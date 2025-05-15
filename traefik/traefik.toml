@@ -1,0 +1,15 @@
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+
+[providers]
+  [providers.docker]
+    watch = true
+    network = "shared"
+
+[log]
+  level = "INFO"
+
+[api]
+  dashboard = true
+  insecure = true

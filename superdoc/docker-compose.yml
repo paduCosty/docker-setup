@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ohmydoc_app
+    volumes:
+      - ./ohmydoc:/var/www/html
+      - ./ohmydoc/storage:/var/www/html/storage
+      - ./ohmydoc/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro # Montează cheia privată
+      - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro # Montează cheia publică
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    networks:
+      - shared
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ohmydoc.rule=Host(`ohmydoc.test`)"
+      - "traefik.http.services.ohmydoc.loadbalancer.server.port=80"
+
+  db:
+    image: mysql:8.0
+    container_name: ohmydoc_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ohmydoc
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_TCP_PORT: 3308 # Setează portul MySQL în container
+    ports:
+      - "3308:3308" 
+    networks:
+      - shared
+
+networks:
+  shared:
+    external: true

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: brain_test_app
+    volumes:
+      - ./brain-test:/var/www/html
+      - ./brain-test/storage:/var/www/html/storage
+      - ./brain-test/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+      - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    ports:
+      - "5173:5173" # Expune portul Vite
+    networks:
+      - shared
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.brain-test.rule=Host(`brain-test.test`)"
+      - "traefik.http.services.brain-test.loadbalancer.server.port=80"
+  db:
+    image: mysql:8.0
+    container_name: brain_test_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: brain_test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    networks:
+      - shared
+
+networks:
+  shared:
+    external: true
